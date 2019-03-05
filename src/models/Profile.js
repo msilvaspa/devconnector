@@ -72,4 +72,4 @@ const ProfileSchema = new Schema({
 });
 
 // eslint-disable-next-line no-multi-assign
-module.exports = Profile = ProfileSchema('profile', ProfileSchema);
+module.exports = Profile = mongoose.model('profile', ProfileSchema);
