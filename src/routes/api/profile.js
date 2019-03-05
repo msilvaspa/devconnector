@@ -6,12 +6,14 @@ const passport = require('passport');
 
 const Profile = require('../../models/Profile');
 const User = require('../../models/User');
+const validateProfileInput = require('../../validation/profile');
 
 router.get('/test', (req, res) => res.json({ profile: 'works' }));
 
 router.get('/', passport.authenticate('jwt', { session: false }), (req, res) => {
   const errors = {};
   Profile.findOne({ user: req.user.id })
+    .populate('user', ['name', 'avatar'])
     .then((profile) => {
       if (!profile) {
         errors.noprofile = 'there is no profile for this user';
@@ -23,10 +25,12 @@ router.get('/', passport.authenticate('jwt', { session: false }), (req, res) => 
 });
 
 router.post('/', passport.authenticate('jwt', { session: false }), (req, res) => {
-  const errors = {};
+  const { errors, isValid } = validateProfileInput(req.body);
+
+  if (!isValid) return res.status(400).json(errors);
+
   const profileFields = {};
   profileFields.user = req.user.id;
-
   const profileInfo = [
     'handle',
     'company',
@@ -36,7 +40,6 @@ router.post('/', passport.authenticate('jwt', { session: false }), (req, res) =>
     'status',
     'githubusername',
   ];
-
   profileInfo.forEach((info) => {
     if (req.body[info]) profileFields[info] = req.body[info];
   });
@@ -47,7 +50,6 @@ router.post('/', passport.authenticate('jwt', { session: false }), (req, res) =>
 
   profileFields.social = {};
   const socialArray = ['youtube', 'twitter', 'facebook', 'linkedin', 'instagram'];
-
   socialArray.forEach((social) => {
     if (req.body[social]) profileFields.social[social] = req.body[social];
   });

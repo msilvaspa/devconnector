@@ -31,7 +31,7 @@ const ProfileSchema = new Schema({
   },
   bio: {
     type: String,
-    required: true,
+    // required: true,
   },
   githubusername: {
     type: String,
